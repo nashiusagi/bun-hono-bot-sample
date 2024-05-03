@@ -6,7 +6,7 @@ const app = new Hono<{ Bindings: Bindings }>();
 
 const targetUrl = "https://github.com/trending/typescript?since=daily"
 
-app.get("/", async (c) => {
+const feeding = async (slackBotToken: string, slackBotTargetChannelName: string) => {
 	const result = await useFetch({
 		url: targetUrl,
 		options: {},
@@ -17,14 +17,14 @@ app.get("/", async (c) => {
 		articles: await useParser(body)
 	}
 	const attachment: Attachment = {
-		title: "Cloudflare Workers Cron Trigger",
+		title: "GitHub Trending [ TypeScript ] ",
 		text: JSON.stringify(repos),
-		author_name: "workers-slack",
+		author_name: "GitHub Trending Feeder",
 		color: "#00FF00",
 	};
 
 	const payload: Payload = {
-		channel: c.env.SLACK_BOT_ACCESS_CHANNEL,
+		channel: slackBotTargetChannelName,
 		attachments: [attachment],
 	};
 
@@ -35,13 +35,25 @@ app.get("/", async (c) => {
 			body: JSON.stringify(payload),
 			headers: {
 				"Content-Type": "application/json; charset=utf-8",
-				Authorization: `Bearer ${c.env.SLACK_BOT_ACCESS_TOKEN}`,
+				Authorization: `Bearer ${slackBotToken}`,
 				Accept: "application/json",
 			},
 		},
 	});
+}
 
-	return c.text(JSON.stringify(repos));
-});
+app.get("/", async(c) => {
+	await feeding(c.env.SLACK_BOT_ACCESS_TOKEN, c.env.SLACK_BOT_ACCESS_CHANNEL)
 
-export default app;
+	return c.text("feeding done!");	
+})
+
+const scheduled: ExportedHandlerScheduledHandler<Bindings> = async (_, env, ctx) => {
+	ctx.waitUntil(feeding(env.SLACK_BOT_ACCESS_TOKEN, env.SLACK_BOT_ACCESS_CHANNEL))
+}
+	
+
+export default {
+	fetch: app.fetch,
+	scheduled
+};
