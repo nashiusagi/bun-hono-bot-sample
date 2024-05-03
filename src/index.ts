@@ -1,18 +1,24 @@
 import { Hono } from "hono";
 import { useFetch } from "./lib/useFetch";
+import { useParser } from "./lib/useParser";
 
 const app = new Hono<{ Bindings: Bindings }>();
 
+const targetUrl = "https://github.com/trending/typescript?since=daily"
+
 app.get("/", async (c) => {
 	const result = await useFetch({
-		url: "http://api.randomuser.me/",
+		url: targetUrl,
 		options: {},
 	});
 
-	const body = JSON.stringify(result);
+	const body = String(result);
+	const repos = {
+		articles: await useParser(body)
+	}
 	const attachment: Attachment = {
 		title: "Cloudflare Workers Cron Trigger",
-		text: body,
+		text: JSON.stringify(repos),
 		author_name: "workers-slack",
 		color: "#00FF00",
 	};
@@ -35,7 +41,7 @@ app.get("/", async (c) => {
 		},
 	});
 
-	return c.text(body);
+	return c.text(JSON.stringify(repos));
 });
 
 export default app;

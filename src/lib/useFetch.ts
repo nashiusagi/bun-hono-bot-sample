@@ -10,7 +10,7 @@ export const useFetch = <T>(request: FetchRequest): Promise<T> => {
 		})
 		.then(handleServerSideErrors)
 		.then((res) => {
-			return res.json();
+			return res.text();
 		});
 };
 
