@@ -18,20 +18,13 @@ const handleServerSideErrors = async (res: Response) => {
 	if (!res) return new Response("Abort Error", undefined);
 	if (res.ok) return res;
 
-	let body = undefined;
-	try {
-		body = await res.json();
-	} catch {
-		console.error("Non json response");
-	}
-
 	switch (res.status) {
 		case 400:
-			throw new Response("Bad Request", { status: res.status });
+			return new Response("Bad Request", { status: res.status });
 		case 404:
-			throw new Response("Not Found", { status: res.status });
+			return new Response("Not Found", { status: res.status });
 		default:
-			throw new Response("Unhandled Error", { status: res.status });
+			return new Response("Unhandled Error", { status: res.status });
 	}
 };
 
