@@ -1,41 +1,64 @@
 import { Hono } from "hono";
 import { useFetch } from "./lib/useFetch";
+import { useParser } from "./lib/useParser";
+import type { Bindings, Attachment, Payload } from "./types";
 
 const app = new Hono<{ Bindings: Bindings }>();
 
+const targetUrl = "https://github.com/trending/typescript?since=daily";
+
+const feeding = async (
+  slackBotToken: string,
+  slackBotTargetChannelName: string,
+) => {
+  const result = await useFetch({
+    url: targetUrl,
+    options: {},
+  });
+
+  const body = String(result);
+  const repos = {
+    articles: await useParser(body),
+  };
+  const attachment: Attachment = {
+    title: "GitHub Trending [ TypeScript ] ",
+    text: JSON.stringify(repos),
+    author_name: "GitHub Trending Feeder",
+    color: "#00FF00",
+  };
+
+  const payload: Payload = {
+    channel: slackBotTargetChannelName,
+    attachments: [attachment],
+  };
+
+  await useFetch({
+    url: "https://slack.com/api/chat.postMessage",
+    options: {
+      method: "POST",
+      body: JSON.stringify(payload),
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        Authorization: `Bearer ${slackBotToken}`,
+        Accept: "application/json",
+      },
+    },
+  });
+};
+
 app.get("/", async (c) => {
-	const result = await useFetch({
-		url: "http://api.randomuser.me/",
-		options: {},
-	});
+  await feeding(c.env.SLACK_BOT_ACCESS_TOKEN, c.env.SLACK_BOT_ACCESS_CHANNEL);
 
-	const body = JSON.stringify(result);
-	const attachment: Attachment = {
-		title: "Cloudflare Workers Cron Trigger",
-		text: body,
-		author_name: "workers-slack",
-		color: "#00FF00",
-	};
-
-	const payload: Payload = {
-		channel: c.env.SLACK_BOT_ACCESS_CHANNEL,
-		attachments: [attachment],
-	};
-
-	await useFetch({
-		url: "https://slack.com/api/chat.postMessage",
-		options: {
-			method: "POST",
-			body: JSON.stringify(payload),
-			headers: {
-				"Content-Type": "application/json; charset=utf-8",
-				Authorization: `Bearer ${c.env.SLACK_BOT_ACCESS_TOKEN}`,
-				Accept: "application/json",
-			},
-		},
-	});
-
-	return c.text(body);
+  return c.text("feeding done!");
 });
 
-export default app;
+const scheduled: ExportedHandlerScheduledHandler<Bindings> = (_, env, ctx) => {
+  ctx.waitUntil(
+    feeding(env.SLACK_BOT_ACCESS_TOKEN, env.SLACK_BOT_ACCESS_CHANNEL),
+  );
+};
+
+export default {
+  fetch: app.fetch,
+  scheduled,
+};

@@ -20,3 +20,6 @@ main = "src/index.ts"
 
 # [ai]
 # binding = "AI"
+
+[triggers]
+crons = ["0 0 * * *"]
