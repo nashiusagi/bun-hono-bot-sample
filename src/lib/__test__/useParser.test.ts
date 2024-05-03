@@ -7,10 +7,10 @@ const Body = `
   <article class='Box-row'><h2>test2</h2></article>
   <article class='Box-row'><h2>test3</h2></article>
 </div>
-`
+`;
 
 test("parse", async () => {
-	const result = await useParser(Body);
+  const result = await useParser(Body);
 
-	expect(result.length).toBe(3);
+  expect(result.length).toBe(3);
 });
