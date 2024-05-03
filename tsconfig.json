@@ -5,9 +5,11 @@
     "moduleResolution": "Bundler",
     "strict": true,
     "lib": [
-      "ESNext"
+      "ESNext", "DOM", "DOM.Iterable"
     ],
     "types": [
+      "web",
+      "bun-types",
       "@cloudflare/workers-types"
     ],
     "jsx": "react-jsx",

@@ -1,5 +1,6 @@
 name = "x_sample_bot"
 compatibility_date = "2023-12-01"
+main = "src/index.ts"
 
 # [vars]
 # MY_VAR = "my-variable"
