@@ -10,12 +10,11 @@ export const useFetch = <T>(request: FetchRequest): Promise<T> => {
 		})
 		.then(handleServerSideErrors)
 		.then((res) => {
-      return res.json()
-    });
+			return res.json();
+		});
 };
 
 const handleServerSideErrors = async (res: Response) => {
-	// NOTE: AbortErrorが発生した場合のみ res === void になりうる
 	if (!res) return new Response("Abort Error", undefined);
 	if (res.ok) return res;
 
@@ -28,11 +27,11 @@ const handleServerSideErrors = async (res: Response) => {
 
 	switch (res.status) {
 		case 400:
-			throw new Response("Bad Request", {status: res.status});
+			throw new Response("Bad Request", { status: res.status });
 		case 404:
-			throw new Response("Not Found", {status: res.status});
+			throw new Response("Not Found", { status: res.status });
 		default:
-			throw new Response("Unhandled Error", {status: res.status});
+			throw new Response("Unhandled Error", { status: res.status });
 	}
 };
 
