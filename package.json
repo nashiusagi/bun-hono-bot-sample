@@ -1,12 +1,15 @@
 {
   "scripts": {
     "dev": "wrangler dev src/index.ts",
-    "deploy": "wrangler deploy --minify src/index.ts"
+    "deploy": "wrangler deploy --minify src/index.ts",
+    "lint": "biome lint ./src",
+    "format": "biome format --write ./src"
   },
   "dependencies": {
     "hono": "^4.2.9"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.7.2",
     "@cloudflare/workers-types": "^4.20240403.0",
     "@types/web": "^0.0.143",
     "wrangler": "^3.47.0"
