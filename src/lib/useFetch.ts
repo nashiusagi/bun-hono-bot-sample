@@ -6,6 +6,7 @@ interface FetchRequest {
 export const useFetch = <T>(request: FetchRequest): Promise<T> => {
   return fetch(request.url, request.options)
     .catch((e) => {
+      console.log(e)
       throw Error(e);
     })
     .then(handleServerSideErrors)
@@ -20,10 +21,13 @@ const handleServerSideErrors = async (res: Response) => {
 
   switch (res.status) {
     case 400:
+      console.log("Bad Request")
       return new Response("Bad Request", { status: res.status });
     case 404:
+      console.log("Not Found")
       return new Response("Not Found", { status: res.status });
     default:
+      console.log("Unhandled Error")
       return new Response("Unhandled Error", { status: res.status });
   }
 };
